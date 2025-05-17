@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:serfilm/models/user.dart';
 import 'package:serfilm/pages/sign_in_page.dart';
 import 'package:serfilm/theme/app_theme.dart';
+import 'package:serfilm/widgets/profile_stats.dart';
+import 'package:serfilm/widgets/profile_settings.dart';
 
 class ProfilePage extends StatelessWidget {
   final User user;
@@ -38,123 +40,143 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Jika user null, tampilkan tampilan kosong yang menarik
+    if (user.id.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Belum ada data user',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Silakan login atau daftar untuk melihat profil Anda.',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Navigasi ke halaman login
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('Login / Daftar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Data statistik user (dummy)
     final stats = [
       {'icon': Icons.movie, 'label': 'Movies Watched', 'value': '27'},
       {'icon': Icons.star, 'label': 'Reviews Written', 'value': '15'},
       {'icon': Icons.bookmark, 'label': 'Watchlist Items', 'value': '42'},
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Title
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Text(
+              'Profile',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          // Profile header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundImage:
+                      user.photoUrl != null
+                          ? NetworkImage(user.photoUrl!)
+                          : null,
+                  child:
+                      user.photoUrl == null
+                          ? Text(
+                            user.name[0].toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 36,
+                              color: Colors.white,
+                            ),
+                          )
+                          : null,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  user.name,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  user.email,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Stats section dipisah ke widget agar lebih rapi
+          ProfileStats(stats: stats),
+          const SizedBox(height: 24),
+
+          // Settings section dipisah ke widget agar lebih rapi
+          const ProfileSettings(),
+
+          // Logout button
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.logout, size: 20),
+            label: const Text("Logout"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () => _handleLogout(context),
           ),
         ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Profile header
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppTheme.primaryColor,
-              backgroundImage:
-                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-              child:
-                  user.photoUrl == null
-                      ? Text(
-                        user.name[0].toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 36,
-                          color: Colors.white,
-                        ),
-                      )
-                      : null,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              user.name,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              user.email,
-              style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-            ),
-            const SizedBox(height: 32),
-
-            // Stats section
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  for (var i = 0; i < stats.length; i++) ...[
-                    _buildStatItem(
-                      icon: stats[i]['icon'] as IconData,
-                      label: stats[i]['label'] as String,
-                      value: stats[i]['value'] as String,
-                    ),
-                    if (i < stats.length - 1) const Divider(),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Settings section
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.person),
-                    title: const Text('Edit Profile'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO: Navigate to edit profile
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.notifications),
-                    title: const Text('Notifications'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO: Navigate to notifications settings
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.security),
-                    title: const Text('Privacy & Security'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO: Navigate to privacy settings
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.help),
-                    title: const Text('Help & Support'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO: Navigate to help & support
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

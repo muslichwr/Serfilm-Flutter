@@ -1,8 +1,5 @@
 import 'package:serfilm/models/genre.dart';
 
-// Enum status watch
-enum MovieWatchStatus { none, toWatch, watched }
-
 class Movie {
   final int id;
   final String title;
@@ -13,9 +10,6 @@ class Movie {
   final double voteAverage;
   final List<int> genreIds;
   final double popularity;
-  final MovieWatchStatus
-  watchStatus; // Status watchlist: none, toWatch, watched
-  final double? personalRating;
 
   Movie({
     required this.id,
@@ -27,8 +21,6 @@ class Movie {
     required this.voteAverage,
     required this.genreIds,
     required this.popularity,
-    this.watchStatus = MovieWatchStatus.none,
-    this.personalRating,
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
@@ -42,37 +34,7 @@ class Movie {
       voteAverage: (json['vote_average'] as num).toDouble(),
       genreIds: List<int>.from(json['genre_ids'] ?? []),
       popularity: (json['popularity'] as num).toDouble(),
-      watchStatus: _parseWatchStatus(json['watchStatus']),
-      personalRating:
-          json['personalRating'] != null
-              ? (json['personalRating'] as num).toDouble()
-              : null,
     );
-  }
-
-  // Membuat salinan Movie dengan properti yang bisa diubah
-  Movie copyWith({MovieWatchStatus? watchStatus, double? personalRating}) {
-    return Movie(
-      id: id,
-      title: title,
-      posterPath: posterPath,
-      backdropPath: backdropPath,
-      overview: overview,
-      releaseDate: releaseDate,
-      voteAverage: voteAverage,
-      genreIds: genreIds,
-      popularity: popularity,
-      watchStatus: watchStatus ?? this.watchStatus,
-      personalRating: personalRating ?? this.personalRating,
-    );
-  }
-
-  // Helper untuk parsing enum dari json
-  static MovieWatchStatus _parseWatchStatus(dynamic value) {
-    if (value == null) return MovieWatchStatus.none;
-    if (value == 'watched') return MovieWatchStatus.watched;
-    if (value == 'to_watch') return MovieWatchStatus.toWatch;
-    return MovieWatchStatus.none;
   }
 }
 

@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:serfilm/models/movie.dart';
+import 'package:serfilm/models/watchlist.dart';
 import 'package:serfilm/services/tmdb_service.dart';
 import 'package:serfilm/widgets/cast_list.dart';
 import 'package:serfilm/widgets/loading_indicator.dart';
+import 'package:serfilm/pages/reviews_page.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final int movieId;
@@ -22,11 +24,14 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   MovieDetails? _movieDetails;
   bool _isLoading = true;
   String? _error;
+  bool _isInWatchlist = false;
+  WatchStatus _watchStatus = WatchStatus.unwatched;
 
   @override
   void initState() {
     super.initState();
     _loadMovieDetails();
+    _checkWatchlistStatus();
   }
 
   Future<void> _loadMovieDetails() async {
@@ -46,6 +51,48 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         _error = 'Failed to load movie details';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _checkWatchlistStatus() async {
+    // TODO: Implementasi dengan service asli
+    // Ini hanya contoh, nantinya harus diambil dari provider atau service
+    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() {
+      _isInWatchlist = false;
+    });
+  }
+
+  void _toggleWatchlist(WatchStatus status) {
+    // TODO: Implementasi dengan service asli
+    setState(() {
+      _isInWatchlist = true;
+      _watchStatus = status;
+    });
+
+    String message =
+        status == WatchStatus.watched
+            ? 'Film ditandai sebagai sudah ditonton'
+            : 'Film ditambahkan ke watchlist';
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _openReviews() {
+    if (_movieDetails != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => ReviewsPage(
+                movieId: _movieDetails!.id,
+                movieTitle: _movieDetails!.title,
+                moviePoster: _movieDetails!.posterPath,
+              ),
+        ),
+      );
     }
   }
 
@@ -102,6 +149,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 slivers: [
                   _buildAppBar(),
                   SliverToBoxAdapter(child: _buildMovieOverview()),
+                  SliverToBoxAdapter(child: _buildActionButtons()),
                   SliverToBoxAdapter(child: _buildMovieStats()),
                   SliverToBoxAdapter(child: _buildCastSection()),
                 ],
@@ -247,7 +295,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.secondary.withValues(alpha: 0.1),
+                      ).colorScheme.secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: Theme.of(context).colorScheme.secondary,
@@ -292,9 +340,18 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             _movieDetails!.overview,
             style: const TextStyle(fontSize: 16, height: 1.5),
           ),
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(height: 24),
+  Widget _buildActionButtons() {
+    if (_movieDetails == null) return const SizedBox();
 
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        children: [
           // Watch trailer button
           if (_movieDetails!.videos.results.any((v) => v.type == 'Trailer'))
             ElevatedButton.icon(
@@ -307,6 +364,95 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 minimumSize: const Size(double.infinity, 48),
               ),
             ),
+
+          const SizedBox(height: 12),
+
+          // Watchlist and Review buttons
+          Row(
+            children: [
+              // Watchlist button
+              Expanded(
+                child: PopupMenuButton<WatchStatus>(
+                  onSelected: _toggleWatchlist,
+                  offset: const Offset(0, 40),
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem(
+                          value: WatchStatus.unwatched,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.bookmark,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Tambahkan ke Watchlist'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: WatchStatus.watched,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Tandai Sudah Ditonton'),
+                            ],
+                          ),
+                        ),
+                      ],
+                  child: ElevatedButton.icon(
+                    onPressed:
+                        null, // Dikosongkan karena sudah ditangani oleh popup
+                    icon: Icon(
+                      _isInWatchlist
+                          ? (_watchStatus == WatchStatus.watched
+                              ? Icons.check_circle
+                              : Icons.bookmark)
+                          : Icons.bookmark_add_outlined,
+                      color:
+                          _isInWatchlist
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                    ),
+                    label: Text(
+                      _isInWatchlist
+                          ? 'Dalam Watchlist'
+                          : 'Tambah ke Watchlist',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.surfaceVariant,
+                      minimumSize: const Size(0, 48),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Review button
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _openReviews,
+                  icon: const Icon(Icons.rate_review),
+                  label: const Text('Lihat Ulasan'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 48),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -318,7 +464,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
         borderRadius: BorderRadius.circular(8),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

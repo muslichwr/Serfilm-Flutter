@@ -3,8 +3,6 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:serfilm/models/movie.dart';
 import 'package:serfilm/widgets/movie_card.dart';
 import 'package:serfilm/widgets/movie_skeleton.dart';
-import 'package:provider/provider.dart';
-import 'package:serfilm/providers/movie_provider.dart';
 
 class MovieGrid extends StatelessWidget {
   final List<Movie> movies;
@@ -20,7 +18,6 @@ class MovieGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final movieProvider = Provider.of<MovieProvider>(context);
     // Calculate grid items based on screen width
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = (screenWidth / 150).floor().clamp(2, 5);
@@ -85,19 +82,6 @@ class MovieGrid extends StatelessWidget {
                 child: MovieCard(
                   movie: movies[index],
                   onTap: () => onMovieTap(movies[index]),
-                  isWishlisted: movieProvider.wishlist.any(
-                    (m) => m.id == movies[index].id,
-                  ),
-                  onWishlistToggle: () {
-                    final isWishlisted = movieProvider.wishlist.any(
-                      (m) => m.id == movies[index].id,
-                    );
-                    if (isWishlisted) {
-                      movieProvider.removeFromWishlist(movies[index]);
-                    } else {
-                      movieProvider.addToWishlist(movies[index]);
-                    }
-                  },
                 ),
               ),
             ),

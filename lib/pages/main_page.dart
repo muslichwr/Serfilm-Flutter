@@ -10,11 +10,11 @@ import 'package:serfilm/widgets/genre_chips.dart';
 import 'package:serfilm/widgets/hero_slider.dart';
 import 'package:serfilm/widgets/movie_grid.dart';
 import 'package:serfilm/widgets/search_box.dart';
-import 'package:serfilm/pages/profile_page.dart';
 import 'package:serfilm/pages/watchlist_page.dart';
+import 'package:serfilm/pages/profile_page.dart';
 import 'package:serfilm/models/user.dart';
+import 'package:serfilm/pages/reviews_page.dart';
 
-/// Halaman utama aplikasi, menampilkan berbagai kategori film dan fitur pencarian.
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -29,19 +29,13 @@ class _MainPageState extends State<MainPage>
   bool _showAppBarTitle = false;
   double _appBarElevation = 0;
 
-  // Mapping kategori ke index
-  static const List<String> _categories = [
-    'trending',
-    'popular',
-    'top_rated',
-    'wishlist',
-  ];
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _categories.length, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _scrollController.addListener(_onScroll);
+
+    // Initialize data
     _loadInitialData();
   }
 
@@ -92,7 +86,27 @@ class _MainPageState extends State<MainPage>
   void _handleCategoryChange(int index) {
     final provider = Provider.of<MovieProvider>(context, listen: false);
     _tabController.animateTo(index);
-    provider.selectCategory(_categories[index]);
+
+    switch (index) {
+      case 0:
+        provider.selectCategory('trending');
+        break;
+      case 1:
+        provider.selectCategory('popular');
+        break;
+      case 2:
+        provider.selectCategory('top_rated');
+        break;
+      case 3:
+        provider.selectCategory('reviews');
+        break;
+      case 4:
+        provider.selectCategory('watchlist');
+        break;
+      case 5:
+        provider.selectCategory('profile');
+        break;
+    }
   }
 
   void _handleGenreSelect(Genre genre) {
@@ -100,27 +114,6 @@ class _MainPageState extends State<MainPage>
       context,
       listen: false,
     ).fetchMoviesByGenre(genre.id);
-  }
-
-  String _getAppBarTitle(MovieProvider provider) {
-    final selectedCategory = provider.selectedCategory;
-    switch (selectedCategory) {
-      case 'trending':
-        return 'Trending Movies';
-      case 'popular':
-        return 'Popular Movies';
-      case 'top_rated':
-        return 'Top Rated Movies';
-      case 'search':
-        return 'Search Results';
-      case 'genre':
-        final selectedGenre = provider.selectedGenre;
-        return selectedGenre?.name ?? 'Genre Movies';
-      case 'wishlist':
-        return 'Wishlist';
-      default:
-        return 'TMDB Movies';
-    }
   }
 
   @override
@@ -131,16 +124,36 @@ class _MainPageState extends State<MainPage>
     final genres = provider.genres;
     final selectedCategory = provider.selectedCategory;
 
-    final appBarTitle = _getAppBarTitle(provider);
-
-    // Dummy user, ganti dengan user dari provider jika sudah ada autentikasi
-    final dummyUser = User(
-      id: 'u1',
-      name: 'John Doe',
-      email: 'john.doe@email.com',
-      photoUrl: null,
-      createdAt: DateTime(2023, 1, 1),
-    );
+    String appBarTitle;
+    switch (selectedCategory) {
+      case 'trending':
+        appBarTitle = 'Trending Movies';
+        break;
+      case 'popular':
+        appBarTitle = 'Popular Movies';
+        break;
+      case 'top_rated':
+        appBarTitle = 'Top Rated Movies';
+        break;
+      case 'search':
+        appBarTitle = 'Search Results';
+        break;
+      case 'genre':
+        final selectedGenre = provider.selectedGenre;
+        appBarTitle = selectedGenre?.name ?? 'Genre Movies';
+        break;
+      case 'reviews':
+        appBarTitle = 'Ulasan Film';
+        break;
+      case 'watchlist':
+        appBarTitle = 'Watchlist';
+        break;
+      case 'profile':
+        appBarTitle = 'Profile';
+        break;
+      default:
+        appBarTitle = 'TMDB Movies';
+    }
 
     return Scaffold(
       body: NestedScrollView(
@@ -149,7 +162,7 @@ class _MainPageState extends State<MainPage>
           return [
             SliverAppBar(
               elevation: _appBarElevation,
-              expandedHeight: 75,
+              expandedHeight: 80,
               floating: true,
               pinned: true,
               title: AnimatedOpacity(
@@ -159,30 +172,6 @@ class _MainPageState extends State<MainPage>
               ),
               backgroundColor: Theme.of(context).colorScheme.surface,
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.bookmark),
-                  tooltip: 'Watchlist',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const WatchlistPage(),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.person),
-                  tooltip: 'Profile',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfilePage(user: dummyUser),
-                      ),
-                    );
-                  },
-                ),
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
@@ -219,52 +208,78 @@ class _MainPageState extends State<MainPage>
           onRefresh: () async {
             await provider.refreshData();
           },
-          child:
-              isLoading && movies.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : AnimationLimiter(
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        // Hero Slider with featured movies
-                        if (selectedCategory != 'search' &&
-                            selectedCategory != 'wishlist' &&
-                            movies.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: HeroSlider(
-                              movies: movies.take(5).toList(),
-                              onMovieTap: _navigateToDetail,
-                            ),
-                          ),
-
-                        // Genre filtering chips
-                        if (selectedCategory != 'search' &&
-                            selectedCategory != 'wishlist')
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            sliver: SliverToBoxAdapter(
-                              child: GenreChips(
-                                genres: genres,
-                                selectedGenreId: provider.selectedGenre?.id,
-                                onGenreSelected: _handleGenreSelect,
-                              ),
-                            ),
-                          ),
-
-                        // Movie Grid
-                        SliverPadding(
-                          padding: const EdgeInsets.all(16),
-                          sliver: SliverToBoxAdapter(
-                            child: MovieGrid(
-                              movies: movies,
-                              isLoading: isLoading,
-                              onMovieTap: _navigateToDetail,
-                            ),
-                          ),
+          child: AnimationLimiter(
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                if (selectedCategory == 'watchlist')
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: WatchlistPage(),
+                    ),
+                  )
+                else if (selectedCategory == 'profile')
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: ProfilePage(
+                        user: User(
+                          id: '1',
+                          name: 'Guest User',
+                          email: 'guest@example.com',
+                          photoUrl: null,
+                          createdAt: DateTime.now(),
                         ),
-                      ],
+                      ),
+                    ),
+                  )
+                else if (selectedCategory == 'reviews')
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 180,
+                        child: ReviewsPage(),
+                      ),
+                    ),
+                  )
+                else ...[
+                  // Hero Slider with featured movies
+                  if (selectedCategory != 'search' && movies.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: HeroSlider(
+                        movies: movies.take(5).toList(),
+                        onMovieTap: _navigateToDetail,
+                      ),
+                    ),
+                  // Genre filtering chips
+                  if (selectedCategory != 'search')
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      sliver: SliverToBoxAdapter(
+                        child: GenreChips(
+                          genres: genres,
+                          selectedGenreId: provider.selectedGenre?.id,
+                          onGenreSelected: _handleGenreSelect,
+                        ),
+                      ),
+                    ),
+                  // Movie Grid
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverToBoxAdapter(
+                      child: MovieGrid(
+                        movies: movies,
+                        isLoading: isLoading,
+                        onMovieTap: _navigateToDetail,
+                      ),
                     ),
                   ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

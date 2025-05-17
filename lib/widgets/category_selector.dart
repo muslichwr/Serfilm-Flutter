@@ -23,7 +23,9 @@ class CategorySelector extends StatelessWidget {
         Tab(icon: Icon(Icons.trending_up), text: 'Trending'),
         Tab(icon: Icon(Icons.favorite), text: 'Popular'),
         Tab(icon: Icon(Icons.star), text: 'Top Rated'),
-        Tab(icon: Icon(Icons.bookmark), text: 'Wishlist'),
+        Tab(icon: Icon(Icons.rate_review), text: 'Reviews'),
+        Tab(icon: Icon(Icons.bookmark), text: 'Watchlist'),
+        Tab(icon: Icon(Icons.person), text: 'Profile'),
       ],
     );
   }

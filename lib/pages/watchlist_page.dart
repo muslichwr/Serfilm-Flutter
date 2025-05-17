@@ -3,6 +3,7 @@ import 'package:serfilm/models/movie.dart';
 import 'package:serfilm/models/watchlist.dart';
 import 'package:serfilm/services/tmdb_service.dart';
 import 'package:serfilm/widgets/movie_card.dart';
+import 'package:serfilm/widgets/watchlist_grid.dart';
 
 class WatchlistPage extends StatefulWidget {
   const WatchlistPage({super.key});
@@ -114,141 +115,105 @@ class _WatchlistPageState extends State<WatchlistPage> {
   Widget build(BuildContext context) {
     final filtered =
         _watchlist.where((w) => w.status == _selectedFilter).toList();
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Watchlist')),
-      body: Column(
-        children: [
-          // Filter chips
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                FilterChip(
-                  selected: _selectedFilter == WatchStatus.unwatched,
-                  label: const Text('Unwatched'),
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedFilter = WatchStatus.unwatched;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  selected: _selectedFilter == WatchStatus.watched,
-                  label: const Text('Watched'),
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedFilter = WatchStatus.watched;
-                    });
-                  },
-                ),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header watchlist
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          width: double.infinity,
+          child: Text(
+            'My Watchlist',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
+        ),
 
-          // Watchlist grid
-          Expanded(
-            child:
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : RefreshIndicator(
-                      onRefresh: _refresh,
-                      child:
-                          filtered.isEmpty
-                              ? ListView(
-                                children: [
-                                  SizedBox(
-                                    height: 300,
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.bookmark_border,
-                                            size: 64,
-                                            color: Colors.grey[600],
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'Watchlist kosong',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                              : GridView.builder(
-                                padding: const EdgeInsets.all(16),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      childAspectRatio: 0.7,
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                    ),
-                                itemCount: filtered.length,
-                                itemBuilder: (context, index) {
-                                  final item = filtered[index];
-                                  final movie = _movies[item.movieId];
-
-                                  if (movie == null) {
-                                    return const SizedBox.shrink();
-                                  }
-
-                                  return Stack(
-                                    children: [
-                                      MovieCard(
-                                        movie: movie,
-                                        onTap: () {
-                                          // TODO: Navigate to movie detail
-                                        },
-                                        isWishlisted: true,
-                                        onWishlistToggle: () {},
-                                      ),
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: PopupMenuButton<WatchStatus>(
-                                          icon: const Icon(
-                                            Icons.more_vert,
-                                            color: Colors.white,
-                                          ),
-                                          onSelected:
-                                              (status) => _handleStatusChange(
-                                                item,
-                                                status,
-                                              ),
-                                          itemBuilder:
-                                              (context) => [
-                                                const PopupMenuItem(
-                                                  value: WatchStatus.unwatched,
-                                                  child: Text(
-                                                    'Mark as Unwatched',
-                                                  ),
-                                                ),
-                                                const PopupMenuItem(
-                                                  value: WatchStatus.watched,
-                                                  child: Text(
-                                                    'Mark as Watched',
-                                                  ),
-                                                ),
-                                              ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                    ),
+        // Filter chips untuk memilih status film dengan tema yang sesuai
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              FilterChip(
+                selected: _selectedFilter == WatchStatus.unwatched,
+                label: const Text('Unwatched'),
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedFilter = WatchStatus.unwatched;
+                  });
+                },
+                backgroundColor: Theme.of(context).cardColor,
+                selectedColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).colorScheme.primary,
+                labelStyle: TextStyle(
+                  color:
+                      _selectedFilter == WatchStatus.unwatched
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.white,
+                  fontWeight:
+                      _selectedFilter == WatchStatus.unwatched
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilterChip(
+                selected: _selectedFilter == WatchStatus.watched,
+                label: const Text('Watched'),
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedFilter = WatchStatus.watched;
+                  });
+                },
+                backgroundColor: Theme.of(context).cardColor,
+                selectedColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).colorScheme.primary,
+                labelStyle: TextStyle(
+                  color:
+                      _selectedFilter == WatchStatus.watched
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.white,
+                  fontWeight:
+                      _selectedFilter == WatchStatus.watched
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        // Grid watchlist
+        Container(
+          height: 600, // Lebih tinggi agar bisa menampung lebih banyak film
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child:
+              _isLoading
+                  ? Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                  : RefreshIndicator(
+                    onRefresh: _refresh,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: WatchlistGrid(
+                      filtered: filtered,
+                      movies: _movies,
+                      onStatusChange: _handleStatusChange,
+                    ),
+                  ),
+        ),
+      ],
     );
   }
 }
