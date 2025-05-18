@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:serfilm/services/tmdb_service.dart';
-import 'package:serfilm/pages/splash_page.dart';
-import 'package:serfilm/providers/movie_provider.dart';
-import 'package:serfilm/theme/app_theme.dart';
+import 'package:serfilm/pages/use_splash_page.dart';
+import 'package:serfilm/pages/login_page.dart';
+import 'package:serfilm/pages/register_page.dart';
+import 'package:serfilm/pages/home/home_page.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
-
   runApp(const MyApp());
 }
 
@@ -23,16 +15,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => MovieProvider(TMDBService())),
-      ],
-      child: MaterialApp(
-        title: 'TMDB Movie App',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const SplashPage(),
-      ),
+    return MaterialApp(
+      title: 'Serfilm',
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/home',
+      routes: {
+        '/splash': (context) => const UseSplashPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }
