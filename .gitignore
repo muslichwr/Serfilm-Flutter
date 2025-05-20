@@ -11,7 +11,13 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-./cursor/
+
+# Cursor specific
+.cursor/
+.cursor
+cursor.json
+cursor/
+cursor.json/
 
 # IntelliJ related
 *.iml
