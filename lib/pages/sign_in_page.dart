@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:serfilm/pages/main_page.dart';
+import 'package:serfilm/pages/home/main_page.dart';
 import 'package:serfilm/pages/sign_up_page.dart';
 import 'package:serfilm/theme/app_theme.dart';
 

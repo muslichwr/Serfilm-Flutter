@@ -10,4 +10,6 @@ class AppColors {
   static const border = Color(0xFF444444);
   static const textFieldBg = Color(0xFF383838);
   static const accent = Color(0xFFC39BD3);
+  static const shadow = Color(0xFF171717); // Bayangan lebih gelap
+  static const divider = Color(0xFF3A3A3A); // Warna pembatas
 }

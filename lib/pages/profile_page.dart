@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:serfilm/models/user.dart';
+import 'package:serfilm/models/user_model.dart';
 import 'package:serfilm/pages/sign_in_page.dart';
 import 'package:serfilm/theme/app_theme.dart';
 import 'package:serfilm/widgets/profile_stats.dart';
 import 'package:serfilm/widgets/profile_settings.dart';
 
 class ProfilePage extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const ProfilePage({super.key, required this.user});
 
@@ -41,7 +41,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Jika user null, tampilkan tampilan kosong yang menarik
-    if (user.id.isEmpty) {
+    if (user.id == null) {
       return Container(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -124,11 +124,11 @@ class ProfilePage extends StatelessWidget {
                   radius: 50,
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   backgroundImage:
-                      user.photoUrl != null
-                          ? NetworkImage(user.photoUrl!)
+                      user.profilePhotoUrl != null
+                          ? NetworkImage(user.profilePhotoUrl!)
                           : null,
                   child:
-                      user.photoUrl == null
+                      user.profilePhotoUrl == null
                           ? Text(
                             user.name[0].toUpperCase(),
                             style: const TextStyle(
