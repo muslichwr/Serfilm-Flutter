@@ -14,7 +14,7 @@ class WatchlistPage extends StatefulWidget {
 class _WatchlistPageState extends State<WatchlistPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _tabs = ['Ditonton', 'Favorit', 'Menonton', 'Nanti'];
+  final List<String> _tabs = ['Belum Ditonton', 'Sudah Ditonton'];
 
   // Data film watchlist
   final List<Map<String, dynamic>> _watchlistFilms = [
@@ -25,7 +25,7 @@ class _WatchlistPageState extends State<WatchlistPage>
       'rating': 8.4,
       'dateAdded': '20 April 2023',
       'type': 'movie',
-      'progress': 0,
+      'status': 'unwatched',
     },
     {
       'title': 'The Witcher: Season 2',
@@ -34,7 +34,7 @@ class _WatchlistPageState extends State<WatchlistPage>
       'rating': 8.1,
       'dateAdded': '15 Maret 2023',
       'type': 'tv',
-      'progress': 0.6,
+      'status': 'watched',
     },
     {
       'title': 'Godzilla vs. Kong',
@@ -43,7 +43,7 @@ class _WatchlistPageState extends State<WatchlistPage>
       'rating': 7.8,
       'dateAdded': '5 Februari 2023',
       'type': 'movie',
-      'progress': 0.3,
+      'status': 'unwatched',
     },
     {
       'title': 'Loki',
@@ -52,7 +52,7 @@ class _WatchlistPageState extends State<WatchlistPage>
       'rating': 8.3,
       'dateAdded': '12 Januari 2023',
       'type': 'tv',
-      'progress': 1.0,
+      'status': 'watched',
     },
     {
       'title': 'Spider-Man: No Way Home',
@@ -61,7 +61,7 @@ class _WatchlistPageState extends State<WatchlistPage>
       'rating': 8.7,
       'dateAdded': '2 Januari 2023',
       'type': 'movie',
-      'progress': 0,
+      'status': 'unwatched',
     },
   ];
 
@@ -112,21 +112,14 @@ class _WatchlistPageState extends State<WatchlistPage>
               ),
               bottom: TabBar(
                 controller: _tabController,
-                isScrollable: true,
                 indicatorColor: AppColors.primary,
                 indicatorWeight: 3,
                 labelColor: AppColors.primary,
                 unselectedLabelColor: AppColors.textSecondary,
-                labelStyle: AppTextStyles.bodyBold.copyWith(fontSize: 13),
-                unselectedLabelStyle: AppTextStyles.body.copyWith(fontSize: 13),
+                labelStyle: AppTextStyles.bodyBold.copyWith(fontSize: 14),
+                unselectedLabelStyle: AppTextStyles.body.copyWith(fontSize: 14),
                 tabs: _tabs.map((String tab) => Tab(text: tab)).toList(),
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.sort, color: AppColors.accent),
-                  onPressed: () {},
-                ),
-              ],
             ),
           ];
         },
@@ -134,35 +127,46 @@ class _WatchlistPageState extends State<WatchlistPage>
           controller: _tabController,
           children: [
             _buildWatchlistTab(_watchlistFilms),
-            _buildEmptyState('Belum ada film favorit', Icons.favorite_border),
-            _buildEmptyState(
-              'Belum ada film yang sedang ditonton',
-              Icons.play_circle_outline,
-            ),
-            _buildEmptyState(
-              'Belum ada film untuk ditonton nanti',
-              Icons.watch_later_outlined,
-            ),
+            _buildWatchlistTab(_watchlistFilms),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: Add new movie to watchlist
+        },
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildWatchlistTab(List<Map<String, dynamic>> films) {
-    if (films.isEmpty) {
+    // Filter film berdasarkan tab yang aktif
+    final filteredFilms =
+        films
+            .where(
+              (film) =>
+                  film['status'] ==
+                  (_tabController.index == 0 ? 'unwatched' : 'watched'),
+            )
+            .toList();
+
+    if (filteredFilms.isEmpty) {
       return _buildEmptyState(
-        'Belum ada film dalam watchlist',
-        Icons.playlist_add,
+        _tabController.index == 0
+            ? 'Belum ada film yang ingin ditonton'
+            : 'Belum ada film yang sudah ditonton',
+        _tabController.index == 0 ? Icons.add_to_queue : Icons.local_movies,
       );
     }
 
     return AnimationLimiter(
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: films.length,
+        itemCount: filteredFilms.length,
         itemBuilder: (context, index) {
-          final film = films[index];
+          final film = filteredFilms[index];
 
           return AnimationConfiguration.staggeredList(
             position: index,
@@ -178,8 +182,7 @@ class _WatchlistPageState extends State<WatchlistPage>
   }
 
   Widget _buildWatchlistItem(Map<String, dynamic> film) {
-    final double progress = film['progress'] as double? ?? 0.0;
-    final bool isCompleted = progress >= 1.0;
+    final bool isWatched = film['status'] == 'watched';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -195,7 +198,21 @@ class _WatchlistPageState extends State<WatchlistPage>
         ],
       ),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/detail_film',
+            arguments: {
+              'title': film['title'],
+              'poster': film['poster'],
+              'year': film['year'],
+              'rating': film['rating'],
+              'type': film['type'],
+              'status': film['status'],
+              'dateAdded': film['dateAdded'],
+            },
+          );
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -203,11 +220,11 @@ class _WatchlistPageState extends State<WatchlistPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Poster film
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
                       imageUrl: film['poster'],
                       width: 80,
                       height: 120,
@@ -229,31 +246,26 @@ class _WatchlistPageState extends State<WatchlistPage>
                             ),
                           ),
                     ),
-                    // Badge tipe (film/tv)
+                  ),
+                  // Badge status
+                  if (isWatched)
                     Positioned(
                       top: 4,
-                      left: 4,
+                      right: 4,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(4),
+                          color: Colors.green.withOpacity(0.9),
+                          shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          film['type'] == 'movie' ? 'FILM' : 'TV',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 12,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
               const SizedBox(width: 16),
               // Detail film
@@ -261,118 +273,95 @@ class _WatchlistPageState extends State<WatchlistPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      film['title'],
+                      style: AppTextStyles.bodyBold,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Film title dan tahun
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                film['title'],
-                                style: AppTextStyles.bodyBold,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(film['year'], style: AppTextStyles.caption),
-                            ],
+                        Icon(
+                          film['type'] == 'movie' ? Icons.movie : Icons.tv,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          film['year'],
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                        // Rating
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getRatingColor(
-                              film['rating'],
-                            ).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                size: 12,
-                                color: _getRatingColor(film['rating']),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                (film['rating'] as double)
-                                    .toStringAsFixed(1)
-                                    .replaceAll('.', ','),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: _getRatingColor(film['rating']),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(width: 12),
+                        Icon(Icons.star, size: 14, color: Colors.amber),
+                        const SizedBox(width: 4),
+                        Text(
+                          (film['rating'] is int)
+                              ? (film['rating'] as int).toStringAsFixed(1)
+                              : (film['rating'] as double).toStringAsFixed(1),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // Tanggal ditambahkan
                     Text(
-                      'Ditambahkan pada ${film['dateAdded']}',
-                      style: AppTextStyles.caption,
+                      'Ditambahkan ${film['dateAdded']}',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    // Progress bar
-                    if (progress > 0)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                isCompleted ? 'Selesai' : 'Sedang ditonton',
-                                style: AppTextStyles.caption.copyWith(
-                                  color:
-                                      isCompleted
-                                          ? Colors.green
-                                          : AppColors.primary,
-                                ),
-                              ),
-                              Text(
-                                '${(progress * 100).toInt()}%',
-                                style: AppTextStyles.caption.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          LinearProgressIndicator(
-                            value: progress,
-                            backgroundColor: AppColors.textFieldBg,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              isCompleted ? Colors.green : AppColors.primary,
-                            ),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 8),
-                    // Action buttons
                     Row(
                       children: [
-                        _buildActionButton(
-                          icon: isCompleted ? Icons.replay : Icons.play_arrow,
-                          label: isCompleted ? 'Tonton Ulang' : 'Tonton',
-                          color: AppColors.primary,
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              // TODO: Toggle watch status
+                            },
+                            icon: Icon(
+                              isWatched ? Icons.refresh : Icons.check,
+                              size: 18,
+                            ),
+                            label: Text(
+                              isWatched ? 'Tandai Belum' : 'Tandai Selesai',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  isWatched ? Colors.orange : Colors.green,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(
+                                  color:
+                                      isWatched ? Colors.orange : Colors.green,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        _buildActionButton(
-                          icon: Icons.delete_outline,
-                          label: 'Hapus',
-                          color: Colors.redAccent,
+                        IconButton(
+                          onPressed: () {
+                            // TODO: Delete from watchlist
+                          },
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          style: IconButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            padding: const EdgeInsets.all(8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(
+                                color: Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -381,25 +370,6 @@ class _WatchlistPageState extends State<WatchlistPage>
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Expanded(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: Icon(icon, size: 16, color: color),
-        label: Text(label, style: TextStyle(fontSize: 12, color: color)),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: color.withOpacity(0.5)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
       ),
     );
@@ -419,9 +389,11 @@ class _WatchlistPageState extends State<WatchlistPage>
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              // TODO: Add new movie
+            },
             icon: const Icon(Icons.add),
-            label: const Text('Tambahkan Film'),
+            label: const Text('Tambah Film'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -436,11 +408,9 @@ class _WatchlistPageState extends State<WatchlistPage>
     );
   }
 
-  // Mendapatkan warna berdasarkan nilai rating
-  Color _getRatingColor(double? rating) {
-    final safeRating = rating ?? 0.0;
-    if (safeRating >= 7.5) return Colors.green;
-    if (safeRating >= 5.0) return Colors.orange;
+  Color _getRatingColor(double rating) {
+    if (rating >= 7.5) return Colors.green;
+    if (rating >= 5.0) return Colors.orange;
     return Colors.red;
   }
 }

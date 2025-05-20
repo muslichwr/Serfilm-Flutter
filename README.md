@@ -1,17 +1,35 @@
-# serfilm
+SerFilm - Movie Watchlist & Review App
 
-A new Flutter project.
+lib\assets\images\serfilm_logo.jpg
 
-## Getting Started
+## 🎯 Fitur Utama Aplikasi
 
-This project is a starting point for a Flutter application.
+1. **Login / Register**
+   - Pengguna dapat membuat akun atau masuk.
+   - Token Sanctum digunakan untuk autentikasi API Laravel.
 
-A few resources to get you started if this is your first Flutter project:
+2. **Cari Film**
+   - Cari film berdasarkan judul menggunakan TMDB API.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. **Watchlist**
+   - Simpan film yang ingin ditonton.
+   - Update status film: "Belum Ditonton" → "Sudah Ditonton".
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# Serfilm-Flutter
+4. **Ulasan & Rating**
+   - Memberikan rating bintang dan komentar tentang film.
+   - Melihat ulasan dari pengguna lain.
+
+5. **Detail Film**
+   - Menampilkan informasi lengkap tentang film.
+   - Termasuk deskripsi, genre, poster, dan rating.
+
+6. **Rekomendasi Film**
+   - Rekomendasi film trending minggu ini.
+   - Rekomendasi berdasarkan genre favorit dari watchlist.
+
+7. **Navigasi Bottom Nav**
+   - Mudah berpindah antar halaman utama:
+     - Beranda
+     - Pencarian
+     - Watchlist
+     - Profil

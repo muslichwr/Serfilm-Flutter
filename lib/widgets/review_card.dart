@@ -1,182 +1,197 @@
 import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
+import '../themes/app_text_styles.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ReviewCard extends StatelessWidget {
   final String? posterUrl;
+  final String? username;
   final String? title;
   final double? rating;
   final String? comment;
-  final String? username;
   final String? date;
+  final bool isCurrentUser;
   final VoidCallback? onWriteReview;
+  final VoidCallback? onEditReview;
 
   const ReviewCard({
-    super.key,
+    Key? key,
     this.posterUrl,
+    this.username,
     this.title,
     this.rating,
     this.comment,
-    this.username,
     this.date,
+    this.isCurrentUser = false,
     this.onWriteReview,
-  });
+    this.onEditReview,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Format rating to one decimal place
-    final formattedRating =
-        (rating != null && rating! >= 0 && rating! <= 10)
-            ? rating!.toStringAsFixed(1).replaceAll('.', ',')
-            : "0,0";
+    final hasComment = comment != null && comment!.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isCurrentUser
+                  ? AppColors.accent.withOpacity(0.1)
+                  : AppColors.divider.withOpacity(0.05),
+          width: isCurrentUser ? 1 : 0.5,
+        ),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar pengguna dengan fallback jika gambar tidak ada
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow.withOpacity(0.08),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: _buildUserAvatar(),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Konten ulasan
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Header dengan avatar dan info user
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
               children: [
-                // Nama pengguna dan tanggal
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        username ?? "Anonim",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    // Rating dalam format desimal
-                    if (rating != null)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getRatingColor().withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          formattedRating,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: _getRatingColor(),
+                // Avatar pengguna
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.accent.withOpacity(0.1),
+                  backgroundImage:
+                      posterUrl != null && posterUrl!.isNotEmpty
+                          ? CachedNetworkImageProvider(posterUrl!)
+                          : null,
+                  child:
+                      posterUrl == null || posterUrl!.isEmpty
+                          ? Icon(
+                            Icons.person,
+                            color: AppColors.accent,
+                            size: 24,
+                          )
+                          : null,
+                ),
+                const SizedBox(width: 12),
+
+                // Info pengguna dan rating
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            username ?? 'Pengguna',
+                            style: AppTextStyles.bodyBold,
                           ),
-                        ),
+                          if (isCurrentUser) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.accent.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Anda',
+                                style: TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                  ],
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (rating != null) ...[
+                            // Rating bintang
+                            Icon(
+                              Icons.star,
+                              color: _getRatingColor(rating),
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              rating!.toStringAsFixed(1),
+                              style: TextStyle(
+                                color: _getRatingColor(rating),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          // Tanggal
+                          Text(
+                            date ?? 'Baru saja',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
-                // Tanggal posting
-                if (date != null && date!.isNotEmpty)
-                  Text(
-                    date!,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
+                // Edit button untuk review milik user sendiri
+                if (isCurrentUser && onEditReview != null)
+                  IconButton(
+                    onPressed: onEditReview,
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: AppColors.accent,
+                      size: 18,
                     ),
-                  ),
-
-                const SizedBox(height: 8),
-
-                // Isi ulasan
-                if (comment != null && comment!.isNotEmpty)
-                  Text(
-                    comment!,
-                    style: TextStyle(
-                      fontSize: 13,
-                      height: 1.4,
-                      color: AppColors.textPrimary.withOpacity(0.9),
-                    ),
-                  )
-                else
-                  Text(
-                    "Tidak ada komentar",
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.textSecondary,
-                    ),
+                    tooltip: 'Edit ulasan',
+                    constraints: BoxConstraints(minWidth: 32, minHeight: 32),
+                    padding: EdgeInsets.zero,
+                    splashRadius: 20,
                   ),
               ],
             ),
           ),
+
+          // Konten ulasan
+          if (hasComment)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Text(
+                comment!,
+                style: AppTextStyles.body.copyWith(
+                  height: 1.5,
+                  color: AppColors.textPrimary.withOpacity(0.9),
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: TextButton.icon(
+                onPressed: onWriteReview,
+                icon: Icon(Icons.create, size: 16, color: AppColors.accent),
+                label: Text(
+                  'Tulis ulasan',
+                  style: TextStyle(color: AppColors.accent, fontSize: 12),
+                ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  // Mendapatkan warna berdasarkan nilai rating
-  Color _getRatingColor() {
+  Color _getRatingColor(double? rating) {
     final safeRating = rating ?? 0.0;
     if (safeRating >= 7.5) return Colors.green;
     if (safeRating >= 5.0) return Colors.orange;
     return Colors.red;
-  }
-
-  // Widget untuk avatar pengguna dengan fallback
-  Widget _buildUserAvatar() {
-    if (posterUrl == null || posterUrl!.isEmpty) {
-      // Fallback avatar jika URL kosong
-      return Container(
-        color: AppColors.surface,
-        child: Icon(Icons.person, size: 24, color: AppColors.textSecondary),
-      );
-    }
-
-    return CachedNetworkImage(
-      imageUrl: posterUrl!,
-      fit: BoxFit.cover,
-      placeholder:
-          (context, url) => Container(
-            color: AppColors.surface,
-            child: Center(
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.accent,
-                ),
-              ),
-            ),
-          ),
-      errorWidget:
-          (context, url, error) => Container(
-            color: AppColors.surface,
-            child: Icon(Icons.person, size: 24, color: AppColors.textSecondary),
-          ),
-    );
   }
 }

@@ -386,239 +386,277 @@ class _HomePageState extends State<HomePage>
 
   // Single featured movie item for carousel
   Widget _buildFeaturedMovieItem(Map<String, dynamic> movie) {
-    return Stack(
-      children: [
-        // Poster Film dengan overlay gradient
-        Container(
-          height: 450,
-          width: double.infinity,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: ShaderMask(
-              shaderCallback: (rect) {
-                return LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    AppColors.background.withOpacity(0.4),
-                    AppColors.background.withOpacity(0.8),
-                    AppColors.background,
-                  ],
-                  stops: const [0.3, 0.6, 0.8, 1.0],
-                ).createShader(rect);
-              },
-              blendMode: BlendMode.dstIn,
-              child: CachedNetworkImage(
-                imageUrl: movie['poster'],
-                fit: BoxFit.cover,
-                placeholder:
-                    (_, __) => Container(
-                      color: AppColors.surface,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/detail_film',
+          arguments: {
+            'title': movie['title'],
+            'poster': movie['poster'],
+            'year': movie['year'],
+            'rating': movie['rating'],
+            'type': 'movie',
+            'description': movie['description'],
+            'duration': movie['duration'],
+            'genre': movie['genre'],
+            'status': 'unwatched',
+          },
+        );
+      },
+      child: Stack(
+        children: [
+          // Poster Film dengan overlay gradient
+          Container(
+            height: 450,
+            width: double.infinity,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: ShaderMask(
+                shaderCallback: (rect) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      AppColors.background.withOpacity(0.4),
+                      AppColors.background.withOpacity(0.8),
+                      AppColors.background,
+                    ],
+                    stops: const [0.3, 0.6, 0.8, 1.0],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: CachedNetworkImage(
+                  imageUrl: movie['poster'],
+                  fit: BoxFit.cover,
+                  placeholder:
+                      (_, __) => Container(
+                        color: AppColors.surface,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                            strokeWidth: 2,
                           ),
-                          strokeWidth: 2,
                         ),
                       ),
-                    ),
-                errorWidget:
-                    (_, __, ___) => Container(
-                      color: AppColors.surface,
-                      child: Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: AppColors.textSecondary,
-                          size: 48,
+                  errorWidget:
+                      (_, __, ___) => Container(
+                        color: AppColors.surface,
+                        child: Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            color: AppColors.textSecondary,
+                            size: 48,
+                          ),
                         ),
                       ),
-                    ),
+                ),
               ),
             ),
           ),
-        ),
 
-        // Content overlay
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Genre tag
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.accent.withOpacity(0.9),
-                        AppColors.primary.withOpacity(0.9),
-                      ],
+          // Content overlay
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Genre tag
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.accent.withOpacity(0.9),
+                          AppColors.primary.withOpacity(0.9),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    movie['genre'],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Movie title
-                Text(
-                  movie['title'],
-                  style: TextStyle(
-                    fontSize: 30,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Movie details
-                Row(
-                  children: [
-                    // Year
-                    Text(
-                      movie['year'],
+                    child: Text(
+                      movie['genre'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
                       ),
                     ),
+                  ),
 
-                    const SizedBox(width: 16),
+                  const SizedBox(height: 16),
 
-                    // Duration
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time_rounded,
+                  // Movie title
+                  Text(
+                    movie['title'],
+                    style: TextStyle(
+                      fontSize: 30,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Movie details
+                  Row(
+                    children: [
+                      // Year
+                      Text(
+                        movie['year'],
+                        style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
-                          size: 14,
+                          fontSize: 14,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          movie['duration'],
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // Rating
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getRatingColor(
-                          movie['rating'],
-                        ).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
+
+                      const SizedBox(width: 16),
+
+                      // Duration
+                      Row(
                         children: [
                           Icon(
-                            Icons.star_rounded,
-                            color: _getRatingColor(movie['rating']),
-                            size: 16,
+                            Icons.access_time_rounded,
+                            color: Colors.white.withOpacity(0.8),
+                            size: 14,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            (movie['rating'] as double)
-                                .toStringAsFixed(1)
-                                .replaceAll('.', ','),
+                            movie['duration'],
                             style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
                               fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: _getRatingColor(movie['rating']),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 20),
+                      const SizedBox(width: 16),
 
-                // Brief description
-                Text(
-                  movie['description'],
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 15,
-                    height: 1.5,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Info button
-                Align(
-                  alignment: Alignment.center,
-                  child: InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 1,
+                      // Rating
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getRatingColor(
+                            movie['rating'],
+                          ).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.star_rounded,
+                              color: _getRatingColor(movie['rating']),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              (movie['rating'] as double)
+                                  .toStringAsFixed(1)
+                                  .replaceAll('.', ','),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _getRatingColor(movie['rating']),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.white,
-                            size: 18,
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Brief description
+                  Text(
+                    movie['description'],
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Info button
+                  Align(
+                    alignment: Alignment.center,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/detail_film',
+                          arguments: {
+                            'title': movie['title'],
+                            'poster': movie['poster'],
+                            'year': movie['year'],
+                            'rating': movie['rating'],
+                            'type': 'movie',
+                            'description': movie['description'],
+                            'duration': movie['duration'],
+                            'genre': movie['genre'],
+                            'status': 'unwatched',
+                          },
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "LIHAT DETAIL",
-                            style: TextStyle(
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
                               color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
+                              size: 18,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              "LIHAT DETAIL",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -866,154 +904,177 @@ class _HomePageState extends State<HomePage>
                     child: Container(
                       width: 130,
                       margin: const EdgeInsets.only(right: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Poster film
-                          Stack(
-                            children: [
-                              Container(
-                                height: 170,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.shadow.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: CachedNetworkImage(
-                                    imageUrl:
-                                        movie['poster'] as String? ??
-                                        'https://via.placeholder.com/150x200.png?text=No+Image',
-                                    fit: BoxFit.cover,
-                                    width: 130,
-                                    height: 170,
-                                    placeholder:
-                                        (_, __) => Container(
-                                          color: AppColors.surface,
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.accent,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/detail_film',
+                            arguments: {
+                              'title': movie['title'],
+                              'poster': movie['poster'],
+                              'rating': movie['rating'],
+                              'type': 'movie',
+                              'year':
+                                  movie['year'] ??
+                                  DateTime.now().year.toString(),
+                              'dateAdded': movie['addedDate'],
+                              'status': movie['status'] ?? 'unwatched',
+                              'isFavorite': movie['isFavorite'] ?? false,
+                            },
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Poster film
+                            Stack(
+                              children: [
+                                Container(
+                                  height: 170,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.shadow.withOpacity(
+                                          0.1,
+                                        ),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: CachedNetworkImage(
+                                      imageUrl:
+                                          movie['poster'] as String? ??
+                                          'https://via.placeholder.com/150x200.png?text=No+Image',
+                                      fit: BoxFit.cover,
+                                      width: 130,
+                                      height: 170,
+                                      placeholder:
+                                          (_, __) => Container(
+                                            color: AppColors.surface,
+                                            child: Center(
+                                              child: SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: AppColors.accent,
+                                                    ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                    errorWidget:
-                                        (_, __, ___) => Container(
-                                          color: AppColors.surface,
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            color: AppColors.textSecondary,
+                                      errorWidget:
+                                          (_, __, ___) => Container(
+                                            color: AppColors.surface,
+                                            child: Icon(
+                                              Icons.broken_image,
+                                              color: AppColors.textSecondary,
+                                            ),
                                           ),
-                                        ),
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              // Rating badge
-                              if (rating != null)
-                                Positioned(
-                                  bottom: 8,
-                                  right: 8,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _getRatingColor(
-                                        rating,
-                                      ).withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          size: 14,
-                                          color: _getRatingColor(rating),
-                                        ),
-                                        SizedBox(width: 2),
-                                        Text(
-                                          formattedRating,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
+                                // Rating badge
+                                if (rating != null)
+                                  Positioned(
+                                    bottom: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _getRatingColor(
+                                          rating,
+                                        ).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            size: 14,
                                             color: _getRatingColor(rating),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                              // Favorite icon if isFavorite = true
-                              if (isFavorite)
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: Container(
-                                    padding: EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.5),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.favorite,
-                                      color: Colors.redAccent,
-                                      size: 14,
-                                    ),
-                                  ),
-                                ),
-
-                              // Added date for favorites
-                              if (addedDate != null)
-                                Positioned(
-                                  top: 8,
-                                  left: 8,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      addedDate,
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        color: Colors.white,
+                                          SizedBox(width: 2),
+                                          Text(
+                                            formattedRating,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: _getRatingColor(rating),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Judul film
-                          Text(
-                            movie['title'] as String? ?? 'Tidak ada judul',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
+
+                                // Favorite icon if isFavorite = true
+                                if (isFavorite)
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.favorite,
+                                        color: Colors.redAccent,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+
+                                // Added date for favorites
+                                if (addedDate != null)
+                                  Positioned(
+                                    top: 8,
+                                    left: 8,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        addedDate,
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            // Judul film
+                            Text(
+                              movie['title'] as String? ?? 'Tidak ada judul',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

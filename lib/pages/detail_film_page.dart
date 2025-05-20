@@ -4,6 +4,7 @@ import '../../themes/app_colors.dart';
 import '../../themes/app_text_styles.dart';
 import '../../widgets/film_card.dart';
 import '../../widgets/review_card.dart';
+import './review_film_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class DetailFilmPage extends StatelessWidget {
@@ -11,18 +12,54 @@ class DetailFilmPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Menerima data film dari arguments
+    final Map<String, dynamic> filmData =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+        {};
+    final bool isWatched = filmData['status'] == 'watched';
+    final bool isInWatchlist = filmData['isInWatchlist'] ?? false;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.bookmark_add_outlined, color: Colors.white),
-            onPressed: () {
-              // Toggle watchlist
-            },
+          // Status badge di app bar
+          Container(
+            margin: EdgeInsets.only(right: 16),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color:
+                  isWatched
+                      ? Colors.green.withOpacity(0.2)
+                      : Colors.orange.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isWatched ? Icons.check_circle : Icons.schedule,
+                  color: isWatched ? Colors.green : Colors.orange,
+                  size: 16,
+                ),
+                SizedBox(width: 4),
+                Text(
+                  isWatched ? 'Sudah Ditonton' : 'Belum Ditonton',
+                  style: TextStyle(
+                    color: isWatched ? Colors.green : Colors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -51,6 +88,7 @@ class DetailFilmPage extends StatelessWidget {
                   blendMode: BlendMode.dstIn,
                   child: CachedNetworkImage(
                     imageUrl:
+                        filmData['poster'] ??
                         "https://via.placeholder.com/400x250.png?text=Movie+Poster",
                     height: 300,
                     width: double.infinity,
@@ -78,7 +116,9 @@ class DetailFilmPage extends StatelessWidget {
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.9),
+                                color: _getRatingColor(
+                                  filmData['rating'] as double,
+                                ).withOpacity(0.9),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
@@ -91,7 +131,8 @@ class DetailFilmPage extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    "8.8",
+                                    (filmData['rating'] as double)
+                                        .toStringAsFixed(1),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -101,9 +142,9 @@ class DetailFilmPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            // Tahun dan Genre
+                            // Tahun dan Tipe
                             Text(
-                              "2010 • Action, Sci-Fi",
+                              "${filmData['year']} • ${filmData['type'] == 'movie' ? 'Film' : 'Serial TV'}",
                               style: AppTextStyles.body.copyWith(
                                 color: Colors.white.withOpacity(0.8),
                               ),
@@ -113,7 +154,7 @@ class DetailFilmPage extends StatelessWidget {
                         const SizedBox(height: 8),
                         // Judul film
                         Text(
-                          "Inception",
+                          filmData['title'] ?? "Judul Tidak Tersedia",
                           style: AppTextStyles.heading.copyWith(
                             fontSize: 28,
                             height: 1.2,
@@ -122,11 +163,129 @@ class DetailFilmPage extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 8),
+                        // Status dan tanggal ditambahkan
+                        Row(
+                          children: [
+                            if (isInWatchlist) ...[
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isWatched
+                                          ? Colors.green.withOpacity(0.2)
+                                          : Colors.orange.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  isWatched
+                                      ? 'Sudah Ditonton'
+                                      : 'Belum Ditonton',
+                                  style: TextStyle(
+                                    color:
+                                        isWatched
+                                            ? Colors.green
+                                            : Colors.orange,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Ditambahkan ${filmData['dateAdded']}',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.7),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ),
               ],
+            ),
+
+            // Action buttons
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  // Tombol tambah ke watchlist
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        // TODO: Implement watchlist toggle
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isInWatchlist
+                                  ? 'Dihapus dari watchlist'
+                                  : 'Ditambahkan ke watchlist',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        isInWatchlist
+                            ? Icons.playlist_remove
+                            : Icons.playlist_add,
+                        size: 20,
+                      ),
+                      label: Text(
+                        isInWatchlist
+                            ? 'Hapus dari Watchlist'
+                            : 'Tambah ke Watchlist',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isInWatchlist
+                                ? Colors.red.shade800
+                                : AppColors.accent,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Tombol tulis ulasan
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      // Navigasi ke halaman review film
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => ReviewFilmPage(filmData: filmData),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.rate_review, size: 20),
+                    label: Text(
+                      'Tulis Ulasan',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      side: BorderSide(color: AppColors.accent),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Konten detail film
@@ -173,7 +332,17 @@ class DetailFilmPage extends StatelessWidget {
                     children: [
                       _buildSectionTitle("Ulasan Pengguna"),
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Navigasi ke halaman review film
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      ReviewFilmPage(filmData: filmData),
+                            ),
+                          );
+                        },
                         icon: Icon(
                           Icons.edit,
                           color: AppColors.accent,
@@ -195,7 +364,7 @@ class DetailFilmPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   _buildUserReviews(),
 
                   const SizedBox(height: 40),
@@ -302,7 +471,7 @@ class DetailFilmPage extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 200,
+      height: 220, // Menambah tinggi container
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: BouncingScrollPhysics(),
@@ -311,9 +480,7 @@ class DetailFilmPage extends StatelessWidget {
           final movie = similarMovies[index];
           final rating = movie['rating'] as double?;
           final formattedRating =
-              rating != null
-                  ? rating.toStringAsFixed(1).replaceAll('.', ',')
-                  : "N/A";
+              rating != null ? rating.toStringAsFixed(1) : "N/A";
 
           return AnimationConfiguration.staggeredList(
             position: index,
@@ -377,43 +544,68 @@ class DetailFilmPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // Judul film
-                        Text(
-                          movie['title'] as String? ?? 'Tidak ada judul',
-                          style: AppTextStyles.bodyBold.copyWith(fontSize: 13),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        // Rating
-                        const SizedBox(height: 2),
-                        if (rating != null)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getRatingColor(rating).withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            child: Text(
-                              formattedRating,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: _getRatingColor(rating),
+                        // Judul film dan rating dalam satu container
+                        Container(
+                          height: 44, // Tinggi tetap untuk judul dan rating
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Judul film
+                              Text(
+                                movie['title'] as String? ?? 'Tidak ada judul',
+                                style: AppTextStyles.bodyBold.copyWith(
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          )
-                        else
-                          Text(
-                            "Rating tidak tersedia",
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontStyle: FontStyle.italic,
-                              color: AppColors.textSecondary,
-                            ),
+                              const SizedBox(height: 4),
+                              // Rating
+                              if (rating != null)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _getRatingColor(
+                                      rating,
+                                    ).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        size: 12,
+                                        color: _getRatingColor(rating),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        formattedRating,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: _getRatingColor(rating),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Text(
+                                  "Rating tidak tersedia",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -430,38 +622,77 @@ class DetailFilmPage extends StatelessWidget {
   Widget _buildUserReviews() {
     final List<Map<String, dynamic>> reviewSamples = [
       {
+        'id': '1',
         'name': 'Hiroko Tanaka',
         'avatar': 'https://randomuser.me/api/portraits/women/32.jpg',
         'rating': 9.2,
         'comment':
             'Film dengan alur cerita yang menarik dan visual yang memukau. Sangat direkomendasikan!',
         'date': '2 hari lalu',
+        'isCurrentUser': true,
       },
       {
+        'id': '2',
         'name': 'Kenji Watanabe',
         'avatar': 'https://randomuser.me/api/portraits/men/52.jpg',
         'rating': 7.5,
         'comment':
             'Konsep yang menarik, meskipun beberapa adegan terasa agak dipaksakan. Tapi secara keseluruhan masih layak ditonton.',
         'date': '1 minggu lalu',
+        'isCurrentUser': false,
       },
       {
+        'id': '3',
         'name': 'Yumi Kobayashi',
         'avatar': 'https://randomuser.me/api/portraits/women/44.jpg',
         'rating': 8.7,
         'comment':
             'Akting para pemain sangat mengesankan. Sutradara berhasil membangun tensi dengan baik.',
         'date': '2 minggu lalu',
-      },
-      // Contoh dengan data yang tidak lengkap
-      {
-        'name': 'Pengguna Baru',
-        'avatar': '',
-        'rating': null,
-        'comment': '',
-        'date': 'Baru saja',
+        'isCurrentUser': false,
       },
     ];
+
+    if (reviewSamples.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.divider.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.rate_review_outlined,
+              size: 48,
+              color: AppColors.textSecondary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Belum ada ulasan',
+              style: AppTextStyles.heading.copyWith(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Jadilah yang pertama memberikan ulasan untuk film ini',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary.withOpacity(0.7),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return ListView.separated(
       shrinkWrap: true,
@@ -469,23 +700,69 @@ class DetailFilmPage extends StatelessWidget {
       itemCount: reviewSamples.length,
       separatorBuilder:
           (context, index) => Divider(
-            height: 24,
+            height: 20, // Mengurangi jarak antar review
             thickness: 0.5,
             color: AppColors.divider.withOpacity(0.08),
           ),
       itemBuilder: (context, index) {
         final review = reviewSamples[index];
-        return ReviewCard(
-          posterUrl: review['avatar'],
-          title: review['title'] as String?,
-          rating: review['rating'] as double?,
-          comment: review['comment'] as String?,
-          username: review['name'] as String?,
-          date: review['date'] as String?,
-          onWriteReview: () {},
+        final bool isUserReview = review['isCurrentUser'] == true;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index == reviewSamples.length - 1 ? 0 : 8,
+          ),
+          child: ReviewCard(
+            posterUrl: review['avatar'],
+            title: review['title'] as String?,
+            rating: review['rating'] as double?,
+            comment: review['comment'] as String?,
+            username: review['name'] as String?,
+            date: review['date'] as String?,
+            isCurrentUser: isUserReview,
+            onEditReview:
+                isUserReview ? () => _editReview(context, review) : null,
+            onWriteReview: () {},
+          ),
         );
       },
     );
+  }
+
+  // Fungsi untuk membuka halaman edit review
+  void _editReview(BuildContext context, Map<String, dynamic> review) async {
+    // Navigasi ke halaman review dengan data yang sudah ada
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ReviewFilmPage(
+              filmData: {
+                'id': '123',
+                'title': 'Inception',
+                'poster':
+                    'https://via.placeholder.com/400x250.png?text=Movie+Poster',
+                'year': '2010',
+                'type': 'movie',
+                'status': 'watched',
+              }, // Hardcoded film data for demo
+              existingReview: review,
+            ),
+      ),
+    );
+
+    // Handle hasil dari halaman review
+    if (result != null) {
+      if (result['action'] == 'delete') {
+        // Handle delete action
+        print('Review deleted');
+      } else if (result['action'] == 'update') {
+        // Handle update action
+        print('Review updated: ${result['comment']}');
+        print('New rating: ${result['rating']}');
+        print('New status: ${result['status']}');
+      }
+    }
   }
 
   // Mendapatkan warna berdasarkan nilai rating

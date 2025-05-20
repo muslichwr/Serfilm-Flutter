@@ -89,7 +89,7 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 0),
                         Text(
                           'Pengguna',
                           style: AppTextStyles.heading.copyWith(
