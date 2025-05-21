@@ -20,7 +20,7 @@ class _WatchlistPageState extends State<WatchlistPage>
   final List<Map<String, dynamic>> _watchlistFilms = [
     {
       'title': 'Oppenheimer',
-      'poster': 'https://via.placeholder.com/150x200.png?text=Oppenheimer',
+      'poster': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       'year': '2023',
       'rating': 8.4,
       'dateAdded': '20 April 2023',
@@ -29,7 +29,7 @@ class _WatchlistPageState extends State<WatchlistPage>
     },
     {
       'title': 'The Witcher: Season 2',
-      'poster': 'https://via.placeholder.com/150x200.png?text=Witcher',
+      'poster': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       'year': '2021',
       'rating': 8.1,
       'dateAdded': '15 Maret 2023',
@@ -38,7 +38,7 @@ class _WatchlistPageState extends State<WatchlistPage>
     },
     {
       'title': 'Godzilla vs. Kong',
-      'poster': 'https://via.placeholder.com/150x200.png?text=Godzilla',
+      'poster': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       'year': '2021',
       'rating': 7.8,
       'dateAdded': '5 Februari 2023',
@@ -47,7 +47,7 @@ class _WatchlistPageState extends State<WatchlistPage>
     },
     {
       'title': 'Loki',
-      'poster': 'https://via.placeholder.com/150x200.png?text=Loki',
+      'poster': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       'year': '2021',
       'rating': 8.3,
       'dateAdded': '12 Januari 2023',
@@ -56,7 +56,7 @@ class _WatchlistPageState extends State<WatchlistPage>
     },
     {
       'title': 'Spider-Man: No Way Home',
-      'poster': 'https://via.placeholder.com/150x200.png?text=SpiderMan',
+      'poster': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       'year': '2021',
       'rating': 8.7,
       'dateAdded': '2 Januari 2023',

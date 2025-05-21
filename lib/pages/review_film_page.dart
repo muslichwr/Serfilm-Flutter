@@ -178,7 +178,7 @@ class _ReviewFilmPageState extends State<ReviewFilmPage> {
             child: CachedNetworkImage(
               imageUrl:
                   widget.filmData['poster'] ??
-                  "https://via.placeholder.com/400x250.png?text=Movie+Poster",
+                  "https://cdn-icons-png.flaticon.com/512/9582/9582626.png",
               width: 60,
               height: 80,
               fit: BoxFit.cover,

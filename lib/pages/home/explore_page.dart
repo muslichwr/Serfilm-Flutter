@@ -177,23 +177,23 @@ class _ExplorePageState extends State<ExplorePage> {
     final List<Map<String, dynamic>> countries = [
       {
         'name': 'Korea Selatan',
-        'flag': 'https://via.placeholder.com/40x40.png?text=KR',
+        'flag': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       },
       {
         'name': 'Jepang',
-        'flag': 'https://via.placeholder.com/40x40.png?text=JP',
+        'flag': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       },
       {
         'name': 'Amerika Serikat',
-        'flag': 'https://via.placeholder.com/40x40.png?text=US',
+        'flag': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       },
       {
         'name': 'Indonesia',
-        'flag': 'https://via.placeholder.com/40x40.png?text=ID',
+        'flag': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       },
       {
         'name': 'India',
-        'flag': 'https://via.placeholder.com/40x40.png?text=IN',
+        'flag': 'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
       },
     ];
 

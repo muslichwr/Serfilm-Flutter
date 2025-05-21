@@ -16,20 +16,54 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
-  // Halaman yang tersedia
-  final List<Widget> _pages = const [
-    HomePage(),
-    ExplorePage(),
-    SearchPage(),
-    WatchlistPage(),
-    ProfilePage(),
+  // State untuk halaman
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
   ];
 
+  // GlobalKey untuk HomePage
+  final homePageKey = GlobalKey<HomePageState>();
+
+  // Halaman yang tersedia
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inisialisasi halaman dengan key
+    _pages = [
+      HomePage(key: homePageKey),
+      const ExplorePage(),
+      const SearchPage(),
+      const WatchlistPage(),
+      const ProfilePage(),
+    ];
+  }
+
   void _onItemTapped(int index) {
+    // Simpan index sebelumnya
+    _previousIndex = _currentIndex;
+
     setState(() {
       _currentIndex = index;
     });
+
+    // Jika kembali ke tab home, refresh data
+    if (index == 0 && _previousIndex != 0) {
+      // Tunggu sampai state tersedia setelah build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (homePageKey.currentState != null) {
+          // Memanggil method refreshDataOnPageView pada HomePageState
+          homePageKey.currentState!.refreshDataOnPageView();
+        }
+      });
+    }
   }
 
   @override

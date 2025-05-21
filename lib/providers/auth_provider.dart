@@ -58,15 +58,17 @@ class AuthProvider with ChangeNotifier {
     required String username,
     required String email,
     String? phone,
+    String? profilePhoto,
     required String token,
   }) async {
     try {
       UserModel user = await authService.updateProfile(
         userId: userId,
+        email: email,
         name: name,
         username: username,
-        email: email,
         phone: phone,
+        profilePhoto: profilePhoto,
         token: token,
       );
       _user = user;
@@ -96,5 +98,42 @@ class AuthProvider with ChangeNotifier {
       print(e);
       return false;
     }
+  }
+
+  // Mendapatkan URL foto profil atau placeholder jika tidak ada
+  String getProfilePhotoUrl() {
+    print('DEBUG - User profilePhoto: ${_user?.profilePhoto}');
+    print('DEBUG - User name: ${_user?.name}');
+    print('DEBUG - User username: ${_user?.username}');
+
+    // Kembalikan URL foto profil jika tersedia
+    if (_user != null &&
+        _user!.profilePhoto != null &&
+        _user!.profilePhoto!.isNotEmpty) {
+      print('DEBUG - Menggunakan foto profil dari API: ${_user!.profilePhoto}');
+      return _user!.profilePhoto!;
+    }
+
+    // Menggunakan UI Avatars sebagai placeholder dengan nama user
+    String name = _user?.name ?? 'User';
+    String username = _user?.username ?? '';
+    String initials = '';
+
+    if (name.isNotEmpty) {
+      initials += name[0];
+    }
+
+    if (username.isNotEmpty) {
+      initials += '+${username[0]}';
+    }
+
+    if (initials.isEmpty) {
+      initials = 'U';
+    }
+
+    String placeholderUrl =
+        "https://ui-avatars.com/api/?name=$initials&color=7F9CF5&background=EBF4FF";
+    print('DEBUG - Menggunakan placeholder avatar: $placeholderUrl');
+    return placeholderUrl;
   }
 }

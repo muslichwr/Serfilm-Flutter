@@ -66,7 +66,7 @@ class ProfilePage extends StatelessWidget {
                           child: ClipOval(
                             child: CachedNetworkImage(
                               imageUrl:
-                                  'https://via.placeholder.com/80x80.png?text=User',
+                                  'https://cdn-icons-png.flaticon.com/512/9582/9582626.png',
                               fit: BoxFit.cover,
                               placeholder:
                                   (_, __) => Container(
@@ -134,6 +134,28 @@ class ProfilePage extends StatelessWidget {
 
   // Statistik pengguna
   Widget _buildStatsSection() {
+    // Buat widget stat item terlebih dahulu
+    final List<Widget> statItems = [
+      _buildStatItem(
+        icon: Icons.movie_outlined,
+        title: 'Ditonton',
+        value: '36',
+        color: AppColors.primary,
+      ),
+      _buildStatItem(
+        icon: Icons.bookmarks_outlined,
+        title: 'Watchlist',
+        value: '24',
+        color: AppColors.accent,
+      ),
+      _buildStatItem(
+        icon: Icons.reviews_outlined,
+        title: 'Ulasan',
+        value: '12',
+        color: Colors.orangeAccent,
+      ),
+    ];
+
     return AnimationLimiter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,26 +173,7 @@ class ProfilePage extends StatelessWidget {
                     horizontalOffset: 50.0,
                     child: FadeInAnimation(child: widget),
                   ),
-              children: [
-                _buildStatItem(
-                  icon: Icons.movie_outlined,
-                  title: 'Ditonton',
-                  value: '36',
-                  color: AppColors.primary,
-                ),
-                _buildStatItem(
-                  icon: Icons.bookmarks_outlined,
-                  title: 'Watchlist',
-                  value: '24',
-                  color: AppColors.accent,
-                ),
-                _buildStatItem(
-                  icon: Icons.reviews_outlined,
-                  title: 'Ulasan',
-                  value: '12',
-                  color: Colors.orangeAccent,
-                ),
-              ],
+              children: statItems,
             ),
           ),
         ],
@@ -185,50 +188,52 @@ class ProfilePage extends StatelessWidget {
     required String value,
     required Color color,
   }) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+    // Buat content widget terlebih dahulu
+    Widget content = Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
+
+    // Bungkus dengan Expanded di luar
+    return Expanded(child: content);
   }
 
   // Pengaturan aplikasi
